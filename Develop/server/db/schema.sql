@@ -1,0 +1,5 @@
+-- DROP DATABASE
+DROP DATABASE IF EXISTS gamefindme_db;
+
+-- CREATE DATABASE
+CREATE DATABASE gamefindme_db;
