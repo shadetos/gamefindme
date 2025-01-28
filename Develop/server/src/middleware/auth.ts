@@ -20,7 +20,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         return res.sendStatus(403);
       }
 
-      req.user = { username: payload.username };
+      // Assigning id with a default value of 0
+      req.user = { id: 0, username: payload.username }; 
       next();
     });
   } else {
