@@ -4,9 +4,9 @@ export const seedUsers = async (): Promise<void> => {
   try {
     await User.bulkCreate([
       {
-        username: 'test123',
-        email: 'test123@example.com',
-        password: 'test123',
+        username: 'testuser',
+        email: 'testuser@example.com',
+        password: 'password123',
       },
       {
         username: 'john',

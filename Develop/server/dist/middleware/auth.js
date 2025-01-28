@@ -10,8 +10,8 @@ const authenticateToken = (req, res, next) => {
     if (authHeader) {
         const token = authHeader.split(' ')[1];
         const secretKey = process.env.JWT_SECRET_KEY || '';
-        jsonwebtoken_1.default.verify(token, secretKey, (_err, decoded) => {
-            if (_err) {
+        jsonwebtoken_1.default.verify(token, secretKey, (err, decoded) => {
+            if (err) {
                 return res.sendStatus(403); // Invalid token
             }
             // Ensure decoded payload has a username

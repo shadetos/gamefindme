@@ -39,7 +39,8 @@ User.init(
     sequelize,
     tableName: 'users',
     timestamps: true,
-    underscored: true,
+    createdAt: 'created_at', // Map 'created_at' in DB to 'createdAt' in code
+    updatedAt: 'updated_at', // Map 'updated_at' in DB to 'updatedAt' in code
   }
 );
 

@@ -8,8 +8,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const token = authHeader.split(' ')[1];
     const secretKey = process.env.JWT_SECRET_KEY || '';
 
-    jwt.verify(token, secretKey, (_err: Error | null, decoded) => {
-      if (_err) {
+    jwt.verify(token, secretKey, (err, decoded) => {
+      if (err) {
         return res.sendStatus(403); // Invalid token
       }
 
