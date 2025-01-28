@@ -1,3 +1,6 @@
+title: Game Find Me
+description: A website for gamers to connect
+theme: jekyll-theme-primer
 exclude:
   - node_modules
   - README.md

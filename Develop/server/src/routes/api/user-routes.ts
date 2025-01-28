@@ -8,11 +8,13 @@ const router = express.Router();
 router.get('/', async (_req: Request, res: Response) => {
   try {
     const users = await User.findAll({
-      attributes: { exclude: ['password'] }
+      attributes: ['id', 'username'] 
     });
+    console.log('Fetched users:', users); 
     res.json(users);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users.' });
   }
 });
 
