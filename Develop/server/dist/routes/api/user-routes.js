@@ -3,86 +3,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userRouter = void 0;
-const express_1 = __importDefault(require("express"));
-const index_js_1 = require("../../models/index.js");
-const router = express_1.default.Router();
-exports.userRouter = router;
-// GET /users - Get all users
-router.get('/', async (_req, res) => {
+const express_1 = require("express");
+const User_1 = __importDefault(require("../../models/User")); // ✅ Ensure the correct import
+const userRouter = (0, express_1.Router)();
+// ✅ Route to get all users
+userRouter.get('/', async (req, res, next) => {
     try {
-        const users = await index_js_1.User.findAll({
-            attributes: { exclude: ['password'] }
-        });
+        const users = await User_1.default.findAll({ attributes: ['id', 'username', 'email'] });
         res.json(users);
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching users:', error);
+        next(error); // Pass error to Express error handler
     }
 });
-// GET /users/:id - Get a user by id
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const user = await index_js_1.User.findByPk(id, {
-            attributes: { exclude: ['password'] }
-        });
-        if (user) {
-            res.json(user);
+// ✅ Route to add a friend
+userRouter.post('/add-friend', (req, res, next) => {
+    (async () => {
+        try {
+            const { userId, friendId } = req.body;
+            if (!userId || !friendId) {
+                res.status(400).json({ message: 'Both userId and friendId are required.' });
+                return;
+            }
+            const user = await User_1.default.findByPk(userId);
+            const friend = await User_1.default.findByPk(friendId);
+            if (!user || !friend) {
+                res.status(404).json({ message: 'User or friend not found.' });
+                return;
+            }
+            if (typeof user.addFriend === 'function') {
+                await user.addFriend(friend);
+                res.status(200).json({ message: 'Friend added successfully!' });
+            }
+            else {
+                res.status(500).json({ message: 'addFriend method not available.' });
+            }
         }
-        else {
-            res.status(404).json({ message: 'User not found' });
+        catch (error) {
+            console.error('Error adding friend:', error);
+            next(error); // Pass error to Express error handler
         }
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    })();
 });
-// POST /users - Create a new user
-router.post('/', async (req, res) => {
-    const { username, email, password } = req.body;
-    try {
-        const newUser = await index_js_1.User.create({ username, email, password });
-        res.status(201).json(newUser);
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-// PUT /users/:id - Update a user by id
-router.put('/:id', async (req, res) => {
-    const { id } = req.params;
-    const { username, password } = req.body;
-    try {
-        const user = await index_js_1.User.findByPk(id);
-        if (user) {
-            user.username = username;
-            user.password = password;
-            await user.save();
-            res.json(user);
-        }
-        else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-// DELETE /users/:id - Delete a user by id
-router.delete('/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const user = await index_js_1.User.findByPk(id);
-        if (user) {
-            await user.destroy();
-            res.json({ message: 'User deleted' });
-        }
-        else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+exports.default = userRouter;

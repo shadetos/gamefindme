@@ -1,84 +1,55 @@
-import express from 'express';
-import type { Request, Response } from 'express';
-import { User } from '../../models/index.js';
+import express, { Router, Request, Response, NextFunction } from 'express';
+import User from '../../models/User'; 
 
-const router = express.Router();
+const userRouter = Router();
 
-// GET /users - Get all users
-router.get('/', async (_req: Request, res: Response) => {
+userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await User.findAll({
-      attributes: ['id', 'username'] 
-    });
-    console.log('Fetched users:', users); 
+    const users = await User.findAll({ attributes: ['id', 'username', 'email'] });
     res.json(users);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Error fetching users.' });
+    next(error); // Pass error to Express error handler
   }
 });
 
-// GET /users/:id - Get a user by id
-router.get('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const user = await User.findByPk(id, {
-      attributes: { exclude: ['password'] }
-    });
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-});
+interface AddFriendRequest {
+  userId: string;
+  friendId: string;
+}
 
-// POST /users - Create a new user
-router.post('/', async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
-  try {
-    const newUser = await User.create({ username, email, password });
-    res.status(201).json(newUser);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+userRouter.post(
+  '/add-friend',
+  (req: Request, res: Response, next: NextFunction): void => {
+    (async () => {
+      try {
+        const { userId, friendId } = req.body as AddFriendRequest;
 
-// PUT /users/:id - Update a user by id
-router.put('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { username, password } = req.body;
-  try {
-    const user = await User.findByPk(id);
-    if (user) {
-      user.username = username;
-      user.password = password;
-      await user.save();
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+        if (!userId || !friendId) {
+          res.status(400).json({ message: 'Both userId and friendId are required.' });
+          return;
+        }
 
-// DELETE /users/:id - Delete a user by id
-router.delete('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const user = await User.findByPk(id);
-    if (user) {
-      await user.destroy();
-      res.json({ message: 'User deleted' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-});
+        const user = await User.findByPk(userId);
+        const friend = await User.findByPk(friendId);
 
-export { router as userRouter };
+        if (!user || !friend) {
+          res.status(404).json({ message: 'User or friend not found.' });
+          return;
+        }
+
+        if (typeof user.addFriend === 'function') {
+          await user.addFriend(friend);
+          res.status(200).json({ message: 'Friend added successfully!' });
+        } else {
+          res.status(500).json({ message: 'addFriend method not available.' });
+        }
+      } catch (error) {
+        console.error('Error adding friend:', error);
+        next(error); // Pass error to Express error handler
+      }
+    })();
+  }
+);
+
+export default userRouter;

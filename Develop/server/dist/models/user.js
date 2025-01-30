@@ -10,7 +10,7 @@ class User extends sequelize_1.Model {
 User.init({
     id: {
         type: sequelize_1.DataTypes.UUID,
-        defaultValue: sequelize_1.DataTypes.UUIDV4,
+        defaultValue: sequelize_1.DataTypes.UUIDV4, // ✅ Ensure UUID consistency
         allowNull: false,
         primaryKey: true,
     },
@@ -34,6 +34,14 @@ User.init({
     sequelize: connection_1.default,
     tableName: 'users',
     timestamps: true,
-    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+});
+// ✅ Correctly define the many-to-many association for friends
+User.belongsToMany(User, {
+    through: 'friendships',
+    as: 'friends',
+    foreignKey: 'userId',
+    otherKey: 'friendId',
 });
 exports.default = User;

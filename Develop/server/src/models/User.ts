@@ -1,4 +1,4 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, BelongsToManyAddAssociationMixin } from 'sequelize';
 import sequelize from '../config/connection';
 
 class User extends Model {
@@ -8,6 +8,8 @@ class User extends Model {
   public password!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
+
+  public addFriend!: BelongsToManyAddAssociationMixin<User, string>;
 }
 
 User.init(
@@ -38,10 +40,15 @@ User.init(
   {
     sequelize,
     tableName: 'users',
-    timestamps: true,
-    createdAt: 'created_at', // Map 'created_at' in DB to 'createdAt' in code
-    updatedAt: 'updated_at', // Map 'updated_at' in DB to 'updatedAt' in code
+    timestamps: true,  
   }
 );
+
+User.belongsToMany(User, {
+  through: 'friendships',
+  as: 'friends',
+  foreignKey: 'userId',
+  otherKey: 'friendId',
+});
 
 export default User;

@@ -13,7 +13,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         return res.sendStatus(403); // Invalid token
       }
 
-      // Ensure decoded payload has a username
       const payload = decoded as JwtPayload & { username: string };
 
       if (!payload.username) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App'; // Ensure App.tsx exists in the same directory
+import App from './App'; 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

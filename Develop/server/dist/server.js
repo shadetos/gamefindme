@@ -16,7 +16,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', auth_routes_1.default);
 // Sync database and start server
-connection_1.default.sync().then(() => {
+connection_1.default.sync({ force: true }).then(() => {
     console.log('Database synced successfully!');
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);

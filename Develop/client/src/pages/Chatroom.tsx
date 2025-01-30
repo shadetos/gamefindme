@@ -16,7 +16,12 @@ const Chatroom: React.FC = () => {
     <div className="bg-gray-900 text-white font-sans h-screen">
       <header className="bg-gray-800 p-4 flex justify-between items-center">
         <div className="flex items-center">
-          <img src="/assets/finalgamelogo.png" alt="Game Find Me Logo" className="w-24 h-24 mr-4" />
+        <img
+          src="/assets/finalgamelogo.png"
+           alt="Game Find Me Logo"
+          className="h-auto w-24 max-w-full object-contain mr-4"
+          />
+
           <h1 className="text-3xl font-bold">Chat with {playerName}</h1>
         </div>
         <button
