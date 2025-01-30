@@ -35,9 +35,9 @@ const Homepage: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/steam/games`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`);
       if (Array.isArray(response.data)) {
-        setUsers(response.data.filter(user => user.id !== localStorage.getItem('userId'))); // Exclude yourself
+        setUsers(response.data);
       } else {
         console.error('Invalid response format:', response.data);
         setUsers([]);
@@ -47,6 +47,7 @@ const Homepage: React.FC = () => {
       setUsers([]);
     }
   };
+  
 
   useEffect(() => {
     fetchGames();
@@ -192,28 +193,28 @@ const Homepage: React.FC = () => {
             </div>
           )}
 
-          {activeScreen === 'friends' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
-              <ul className="space-y-2">
-                {users.length === 0 ? (
-                  <p className="text-gray-400">No other users for now.</p>
-                ) : (
-                  users.map((user) => (
-                    <li key={user.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
-                      <span>{user.username}</span>
-                      <button
-                        onClick={() => addFriend(user)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
-                      >
-                        Add Friend
-                      </button>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          )}
+        {activeScreen === 'friends' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
+            <ul className="space-y-2">
+              {users.length === 0 ? (
+                <p className="text-gray-400">No other users for now.</p>
+              ) : (
+                users.map((user) => (
+                  <li key={user.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
+                    <span>{user.username}</span>
+                    <button
+                      onClick={() => addFriend(user)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
+                    >
+                      Add Friend
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        )}
         </div>
       </div>
     </div>
