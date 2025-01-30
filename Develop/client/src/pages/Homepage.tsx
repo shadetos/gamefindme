@@ -12,7 +12,7 @@ interface Game {
 }
 
 const Homepage: React.FC = () => {
-  const [activeScreen, setActiveScreen] = useState<'friends' | 'settings' | 'home' | null>(null);
+  const [activeScreen, setActiveScreen] = useState<'friends' | 'settings' | 'home' | 'favorites' | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [friends, setFriends] = useState<User[]>(() => {
     const savedFriends = localStorage.getItem('friends');
@@ -115,16 +115,47 @@ const Homepage: React.FC = () => {
       <div className="flex">
         <div className="bg-gray-800 w-64 h-screen p-4">
           <h2 className="text-lg font-semibold mb-4">Menu</h2>
-          <ul className="space-y-2">
-            <li className="p-2 bg-blue-700 rounded">
+                    <ul className="space-y-2">
+            <li className={`p-2 rounded ${activeScreen === 'home' ? 'bg-blue-700' : 'hover:bg-gray-700'}`}>
               <button onClick={() => setActiveScreen('home')} className="w-full text-left">Home</button>
             </li>
-            <li className="p-2 rounded hover:bg-gray-700">
+            <li className={`p-2 rounded ${activeScreen === 'friends' ? 'bg-blue-700' : 'hover:bg-gray-700'}`}>
               <button onClick={() => setActiveScreen('friends')} className="w-full text-left">Friends</button>
             </li>
+            <li className={`p-2 rounded ${activeScreen === 'favorites' ? 'bg-blue-700' : 'hover:bg-gray-700'}`}>
+              <button onClick={() => setActiveScreen('favorites')} className="w-full text-left">Favorites</button>
+            </li>
           </ul>
+
         </div>
         <div className="flex-1 p-6">
+                  {activeScreen === 'favorites' && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Your Favorite Games</h2>
+              {favorites.length === 0 ? (
+                <p className="text-gray-400">No favorites added yet.</p>
+              ) : (
+                <ul className="space-y-2 max-h-64 overflow-y-auto">
+                  {favorites.map((game) => (
+                    <li key={game.appid} className="flex justify-between items-center bg-gray-700 p-2 rounded">
+                      <span>{game.name}</span>
+                      <button
+                        onClick={() => {
+                          const updatedFavorites = favorites.filter((fav) => fav.appid !== game.appid);
+                          setFavorites(updatedFavorites);
+                          localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           {activeScreen === 'home' && (
             <div>
               <h2 className="text-xl font-semibold mb-4">Search Steam Games</h2>
