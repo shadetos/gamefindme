@@ -30,6 +30,7 @@ const Homepage: React.FC = () => {
   useEffect(() => {
     if (activeScreen === 'friends') {
       fetchUsers();
+      fetchFriends();
     }
   }, [activeScreen]);
 
@@ -48,6 +49,23 @@ const Homepage: React.FC = () => {
     }
   };
   
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/friends`, {
+        params: { userId: localStorage.getItem('userId') },
+      });
+      if (Array.isArray(response.data)) {
+        setFriends(response.data); // Update state with friends from backend
+        localStorage.setItem('friends', JSON.stringify(response.data));
+      } else {
+        console.error('Invalid response format:', response.data);
+        setFriends([]);
+      }
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      setFriends([]);
+    }
+  };
 
   useEffect(() => {
     fetchGames();
@@ -88,10 +106,12 @@ const Homepage: React.FC = () => {
         const updatedFriends = [...friends, user];
         setFriends(updatedFriends);
         localStorage.setItem('friends', JSON.stringify(updatedFriends));
-
-        // Save to database
-        await axios.post('/api/users/add-friend', { userId: localStorage.getItem('userId'), friendId: user.id });
-
+  
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/users/add-friend`, {
+          userId: localStorage.getItem('userId'),
+          friendId: user.id,
+        });
+  
         console.log(`Friend added: ${user.username}`);
       }
     } catch (error) {
@@ -99,6 +119,23 @@ const Homepage: React.FC = () => {
     }
   };
 
+  const removeFriend = async (friend: User) => {
+    try {
+      const updatedFriends = friends.filter((f) => f.id !== friend.id);
+      setFriends(updatedFriends);
+      localStorage.setItem('friends', JSON.stringify(updatedFriends));
+  
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/remove-friend`, {
+        userId: localStorage.getItem('userId'),
+        friendId: friend.id,
+      });
+  
+      console.log(`Friend removed: ${friend.username}`);
+    } catch (error) {
+      console.error('Error removing friend:', error);
+    }
+  };
+  
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
@@ -193,28 +230,47 @@ const Homepage: React.FC = () => {
             </div>
           )}
 
-        {activeScreen === 'friends' && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
-            <ul className="space-y-2">
-              {users.length === 0 ? (
-                <p className="text-gray-400">No other users for now.</p>
-              ) : (
-                users.map((user) => (
-                  <li key={user.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
-                    <span>{user.username}</span>
-                    <button
-                      onClick={() => addFriend(user)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
-                    >
-                      Add Friend
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        )}
+            {activeScreen === 'friends' && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
+                <ul className="space-y-2">
+                  {users.length === 0 ? (
+                    <p className="text-gray-400">No other users for now.</p>
+                  ) : (
+                    users.map((user) => (
+                      <li key={user.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
+                        <span>{user.username}</span>
+                        <button
+                          onClick={() => addFriend(user)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
+                        >
+                          Add Friend
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+
+                <h2 className="text-xl font-semibold mt-6">Current Friends</h2>
+                <ul className="space-y-2">
+                  {friends.length === 0 ? (
+                    <p className="text-gray-400">No friends added yet.</p>
+                  ) : (
+                    friends.map((friend) => (
+                      <li key={friend.id} className="flex justify-between items-center bg-gray-700 p-2 rounded">
+                        <span>{friend.username}</span>
+                        <button
+                          onClick={() => removeFriend(friend)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            )}
         </div>
       </div>
     </div>
